@@ -6,6 +6,7 @@ assets - sounds and art
 
 import pygame as pg
 import sys
+from os import path
 from settings import *
 from sprites import *
 
@@ -15,20 +16,29 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGTH))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
-        pg.key.set_repeat(300, 100) #after 0.3s delay repeat key each 0.1 if held
+        pg.key.set_repeat(1, 100) #after 1 ms delay repeat key each 100ms if held
         self.load_data()
 
     def load_data(self):
-        pass
+        game_folder = path.dirname(__file__)
+
+        f = open(path.join(game_folder, "map.txt"), "r")
+        self.map_data = f.readlines()
 
     def new(self):
         #setup for a new round
         self.all_sprites = pg.sprite.Group() #collection used to simplify sprites manipulation
         self.walls = pg.sprite.Group()
 
-        self.player = Player(self, 0, 0)
-        for x in range(10, 20):
-            Wall(self, x, 5)
+        #enumarate przypisuje kolejnym obiektom odpowiednie indeksy
+        #ogólnie for index, item in enumerate(iterable):
+        #trochę powrót do iteracji po indeksach, czyli oprócz samej iteracji chcemy też znać aktualny indeks
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+                if tile == 'W':
+                    Wall(self, col, row)
+                if tile == 'P':
+                    self.player = Player(self, col, row)
 
     def run(self):
         #game loop

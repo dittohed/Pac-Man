@@ -14,9 +14,21 @@ class Player(pg.sprite.Sprite):
         self.x = x
         self.y = y
 
+        #moving
+        self.speed = 10
+        self.vel_x, self.vel_y = 0, 0
+
     def move(self, dx = 0, dy = 0):
-        self.x += dx
-        self.y += dy
+        if not self.collide_walls(dx, dy):
+            self.x += dx
+            self.y += dy
+
+    def collide_walls(self, dx = 0, dy = 0):
+        for wall in self.game.walls:
+            if wall.x == self.x + dx and wall.y == self.y + dy:
+                return True
+
+        return False
 
     def update(self):
         self.rect.x = self.x * TILE_SIZE
