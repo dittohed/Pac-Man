@@ -26,13 +26,13 @@ class Game:
         self.map_data = f.readlines()
 
     def new(self):
-        #setup for a new round
+        # setup for a new round
         self.all_sprites = pg.sprite.Group() #collection used to simplify sprites manipulation
         self.walls = pg.sprite.Group()
 
-        #enumarate przypisuje kolejnym obiektom odpowiednie indeksy
-        #ogólnie for index, item in enumerate(iterable):
-        #trochę powrót do iteracji po indeksach, czyli oprócz samej iteracji chcemy też znać aktualny indeks
+        # enumarate przypisuje kolejnym obiektom odpowiednie indeksy
+        # ogólnie for index, item in enumerate(iterable):
+        # trochę powrót do iteracji po indeksach, czyli oprócz samej iteracji chcemy też znać aktualny indeks
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == 'W':
@@ -41,10 +41,16 @@ class Game:
                     self.player = Player(self, col, row)
 
     def run(self):
-        #game loop
+        # game loop
         self.playing = True
         while self.playing:
-            self.dt = self.clock.tick(FPS) / 1000 #pause, so there could be only 60 loops per second
+            """ OGARNĄĆ CZEMU / 1000 """
+            self.dt = self.clock.tick(FPS) / 1000
+            # tick() method computes how many miliseconds have passed since the previous call.
+            # using the argument makes the function delay to keep the game running slower than
+            # the given ticks per second. This can be used to help limit the runtime speed of a game.
+            # By calling Clock.tick(40) once per frame, the program will never run
+            # at more than 40 frames per second.
             self.events()
             self.update()
             self.draw()
@@ -58,34 +64,27 @@ class Game:
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILE_SIZE):
-            pg.draw.line(self.screen, (110, 110, 110), (x, 0), (x, HEIGTH)) #draw vertical lines
+            pg.draw.line(self.screen, (110, 110, 110), (x, 0), (x, HEIGTH)) # draw vertical lines
 
         for y in range(0, HEIGTH, TILE_SIZE):
-            pg.draw.line(self.screen, (110, 110, 110), (0, y), (WIDTH, y)) #draw horizontal lines
+            pg.draw.line(self.screen, (110, 110, 110), (0, y), (WIDTH, y)) # draw horizontal lines
 
     def draw(self):
         self.screen.fill((0, 0, 0))
         self.draw_grid()
         self.all_sprites.draw(self.screen)
-        #pg uses double buffering (likewise whiteboard flipping - draw and then flip the board)
+        # pg uses double buffering (likewise whiteboard flipping - draw and then flip the board)
         pg.display.flip()
 
     def events(self):
-        #catch player input
+        # catch player input
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
-                if event.key == pg.K_LEFT:
-                    self.player.move(dx = -1)
-                if event.key == pg.K_RIGHT:
-                    self.player.move(dx = 1)
-                if event.key == pg.K_UP:
-                    self.player.move(dy = -1)
-                if event.key == pg.K_DOWN:
-                    self.player.move(dy = 1)
+
 
     def show_start_screen(self):
         pass

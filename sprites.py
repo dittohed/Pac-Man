@@ -10,13 +10,28 @@ class Player(pg.sprite.Sprite):
         self.image.fill((0, 255, 255))
         self.rect = self.image.get_rect()
 
-        #grid coordinates
-        self.x = x
-        self.y = y
+        # initially grid coordinates,
+        # now these are actual player coordinates (because rect coordinates must be integers)
+        self.x = x * TILE_SIZE
+        self.y = y * TILE_SIZE
 
-        #moving
-        self.speed = 10
+        # moving
+        self.speed = 200
         self.vel_x, self.vel_y = 0, 0
+
+    def get_keys(self):
+        self.vel_x, self.vel_y = 0, 0
+        keys = pg.key.get_pressed() # object denoting which keys are currently held down
+
+        if keys[pg.K_LEFT] or keys[pg.K_a]:
+            self.vel_x = -self.speed
+        elif keys[pg.K_RIGHT] or keys[pg.K_d]:
+            self.vel_x = self.speed
+        elif keys[pg.K_UP] or keys[pg.K_w]:
+            self.vel_y = -self.speed
+        elif keys[pg.K_DOWN] or keys[pg.K_s]:
+            self.vel_y = self.speed
+
 
     def move(self, dx = 0, dy = 0):
         if not self.collide_walls(dx, dy):
@@ -31,8 +46,16 @@ class Player(pg.sprite.Sprite):
         return False
 
     def update(self):
-        self.rect.x = self.x * TILE_SIZE
-        self.rect.y = self.y * TILE_SIZE
+        self.get_keys()
+
+        self.x += self.vel_x * self.game.dt
+        self.y += self.vel_y * self.game.dt
+        self.rect.topleft = (self.x, self.y)
+
+        if pg.sprite.spritecollideany(self, self.game.walls): # check collisions between arg1 and arg2
+            self.x -= self.vel_x * self.game.dt
+            self.y -= self.vel_y * self.game.dt
+            self.rect.topleft = (self.x, self.y)
 
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
