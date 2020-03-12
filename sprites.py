@@ -16,7 +16,7 @@ class Player(pg.sprite.Sprite):
         self.y = y * TILE_SIZE
 
         # moving
-        self.speed = 200
+        self.speed = 150
         self.vel_x, self.vel_y = 0, 0
 
     def get_keys(self):
@@ -32,30 +32,39 @@ class Player(pg.sprite.Sprite):
         elif keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel_y = self.speed
 
+    def collide_walls(self, dir):
+        hitted = pg.sprite.spritecollide(self, self.game.walls, False) #False, so they don't get deleted
 
-    def move(self, dx = 0, dy = 0):
-        if not self.collide_walls(dx, dy):
-            self.x += dx
-            self.y += dy
-
-    def collide_walls(self, dx = 0, dy = 0):
-        for wall in self.game.walls:
-            if wall.x == self.x + dx and wall.y == self.y + dy:
-                return True
-
-        return False
+        if dir == 'x':
+            if hitted:
+                if self.vel_x > 0:
+                    self.x = hitted[0].rect.left - self.rect.width
+                if self.vel_x < 0:
+                    self.x = hitted[0].rect.right
+                self.vel_x = 0
+                self.rect.x = self.x
+        elif dir == 'y':
+            if hitted:
+                if self.vel_y > 0:
+                    self.y = hitted[0].rect.top - self.rect.height
+                if self.vel_y < 0:
+                    self.y = hitted[0].rect.bottom
+                self.vel_y = 0
+                self.rect.y = self.y
 
     def update(self):
         self.get_keys()
 
+        # velocities are pixels per second, not per frame!
         self.x += self.vel_x * self.game.dt
         self.y += self.vel_y * self.game.dt
-        self.rect.topleft = (self.x, self.y)
 
-        if pg.sprite.spritecollideany(self, self.game.walls): # check collisions between arg1 and arg2
-            self.x -= self.vel_x * self.game.dt
-            self.y -= self.vel_y * self.game.dt
-            self.rect.topleft = (self.x, self.y)
+        # to avoid not sticking to the wall bug
+        self.rect.x = self.x
+        self.collide_walls('x')
+
+        self.rect.y = self.y
+        self.collide_walls('y')
 
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):

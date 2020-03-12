@@ -30,9 +30,8 @@ class Game:
         self.all_sprites = pg.sprite.Group() #collection used to simplify sprites manipulation
         self.walls = pg.sprite.Group()
 
-        # enumarate przypisuje kolejnym obiektom odpowiednie indeksy
-        # ogólnie for index, item in enumerate(iterable):
-        # trochę powrót do iteracji po indeksach, czyli oprócz samej iteracji chcemy też znać aktualny indeks
+        # enumarate assings indices to objects in iterable
+        # in general: for index, item in enumerate(iterable):
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == 'W':
@@ -44,13 +43,18 @@ class Game:
         # game loop
         self.playing = True
         while self.playing:
-            """ OGARNĄĆ CZEMU / 1000 """
             self.dt = self.clock.tick(FPS) / 1000
-            # tick() method computes how many miliseconds have passed since the previous call.
-            # using the argument makes the function delay to keep the game running slower than
+
+            # tick() method computes how many miliseconds have passed since the previous call (previous frame length).
+            # Using the argument makes the function delay to keep the game running slower than
             # the given ticks per second. This can be used to help limit the runtime speed of a game.
-            # By calling Clock.tick(40) once per frame, the program will never run
+            # For example, by calling Clock.tick(40) once per frame, the program will never run
             # at more than 40 frames per second.
+
+            # self.dt is useful for time-based movement (frame independent).
+            # Otherwise going to 30 FPS instead of 60 will make sprites slower.
+            # / 1000 to convert miliseconds to seconds.
+
             self.events()
             self.update()
             self.draw()
