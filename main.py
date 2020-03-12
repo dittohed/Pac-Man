@@ -4,6 +4,8 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
+#TODO: smooth movement (my version)
+
 import pygame as pg
 import sys
 from os import path
