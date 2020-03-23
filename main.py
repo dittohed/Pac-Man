@@ -4,7 +4,9 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-#TODO: smooth movement (my version)
+# TODO: przebudować system poruszania się:
+# 1. Wystarczy raz nacisnąć strzałkę, żeby nadać kierunek poruszania się.
+# 2. Można nadać kierunek z wyprzedzeniem - jeżeli Pac-Man dojdzie do rozwidlenia, to pójdzie w danym kierunku
 
 import pygame as pg
 import sys
@@ -29,7 +31,7 @@ class Game:
 
     def new(self):
         # setup for a new round
-        self.all_sprites = pg.sprite.Group() #collection used to simplify sprites manipulation
+        self.all_sprites = pg.sprite.Group() # simplify sprites manipulation
         self.walls = pg.sprite.Group()
 
         # enumarate assings indices to objects in iterable
@@ -47,15 +49,15 @@ class Game:
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
 
-            # tick() method computes how many miliseconds have passed since the previous call (previous frame length).
-            # Using the argument makes the function delay to keep the game running slower than
-            # the given ticks per second. This can be used to help limit the runtime speed of a game.
-            # For example, by calling Clock.tick(40) once per frame, the program will never run
-            # at more than 40 frames per second.
+        # tick() method computes how many miliseconds have passed since the previous call (previous frame length).
+        # Using the argument makes the function delay to keep the game running slower than
+        # the given ticks per second. This can be used to help limit the runtime speed of a game.
+        # For example, by calling Clock.tick(40) once per frame, the program will never run
+        # at more than 40 frames per second.
 
-            # self.dt is useful for time-based movement (frame independent).
-            # Otherwise going to 30 FPS instead of 60 will make sprites slower.
-            # / 1000 to convert miliseconds to seconds.
+        # self.dt is useful for time-based movement (frame independent).
+        # Otherwise going to 30 FPS instead of 60 will make sprites slower.
+        # / 1000 to convert miliseconds to seconds.
 
             self.events()
             self.update()
