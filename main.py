@@ -7,6 +7,9 @@ assets - sounds and art
 # TODO: przebudować system poruszania się:
 # 1. Wystarczy raz nacisnąć strzałkę, żeby nadać kierunek poruszania się.
 # 2. Można nadać kierunek z wyprzedzeniem - jeżeli Pac-Man dojdzie do rozwidlenia, to pójdzie w danym kierunku
+# 3. Pomyśleć, czy nie usunąć self.x i y
+# 4. Żeby skręty dotyczyły tylko ścian na zakrętach, a nie w zwykłym korytarzu
+# - może wystarczy sprawdzić, czy pod daną ścianą w danym kierunku coś jest (ale jak?)
 
 import pygame as pg
 import sys
