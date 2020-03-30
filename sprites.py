@@ -18,15 +18,17 @@ class Player(pg.sprite.Sprite):
         # moving
         self.speed = 150
         self.vel_x, self.vel_y = 0, 0
+        self.wanna_go = 'r'
 
     def get_keys(self):
-        self.vel_x, self.vel_y = 0, 0
+        # self.vel_x, self.vel_y = 0, 0
         keys = pg.key.get_pressed() # object denoting which keys are currently held down
 
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vel_x = -self.speed
         elif keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vel_x = self.speed
+            self.wanna_go = 'r'
         elif keys[pg.K_UP] or keys[pg.K_w]:
             self.vel_y = -self.speed
         elif keys[pg.K_DOWN] or keys[pg.K_s]:
@@ -37,12 +39,18 @@ class Player(pg.sprite.Sprite):
 
         if dir == 'x':
             if hitted:
-                if self.vel_x > 0:
-                    self.x = hitted[0].rect.left - self.rect.width
-                if self.vel_x < 0:
-                    self.x = hitted[0].rect.right
-                self.vel_x = 0
-                self.rect.x = self.x
+                if self.vel_x > 0 and hitted[0].rect.y - self.rect.y > (9 / 10) * self.rect.height:
+                    self.vel_y = -self.speed
+                    self.y = hitted[0].rect.y - self.rect.height
+                    self.rect.y = self.y
+                else:
+                    if self.vel_x > 0:
+                        self.x = hitted[0].rect.left - self.rect.width
+                    if self.vel_x < 0:
+                        self.x = hitted[0].rect.right
+
+                    self.vel_x = 0
+                    self.rect.x = self.x
         elif dir == 'y':
             if hitted:
                 if self.vel_y > 0:
@@ -54,6 +62,9 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.get_keys()
+
+        if self.wanna_go == 'r':
+            self.vel_x = self.speed
 
         # velocities are pixels per second, not per frame!
         self.x += self.vel_x * self.game.dt
