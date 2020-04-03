@@ -37,14 +37,22 @@ class Player(pg.sprite.Sprite):
 
         if dir == 'x':
             if hitted:
+                # print("x dir collison")
                 # each case covers different crossroad problem type
                 # this prevents blocking player, because it's 1 pixel higher than a corridor he wants to enter
-                if self.vel_y < 0 and hitted[0].rect.y - self.rect.y > (29 / 30) * self.rect.height:
-                                                    # 29 / 30 small enough & yet works
+
+                # and make sure that corridor is above a hitted wall
+                if self.vel_y < 0 and \
+                self.game.screen.get_at((hitted[0].rect.x, hitted[0].rect.y - 1))[:3] == (0, 0, 0) and \
+                (hitted[0].rect.y - self.rect.y > 0.8 * self.rect.height): # 0.8 is small enough & yet works
+                    # going up, wanting to turn left or right
                     self.vel_y = 0
                     self.y = hitted[0].rect.y - self.rect.height
                     self.rect.y = self.y
-                elif self.vel_y > 0 and self.rect.y - hitted[0].rect.y > (29 / 30) * self.rect.height:
+                elif self.vel_y > 0 and \
+                self.game.screen.get_at((hitted[0].rect.x, hitted[0].rect.y + 1))[:3] == (0, 0, 0) and \
+                self.rect.y - hitted[0].rect.y > 0.8 * self.rect.height:
+                    # going down, wanting to turn left or right
                     self.vel_y = 0
                     self.y = hitted[0].rect.y + self.rect.height
                     self.rect.y = self.y
@@ -58,10 +66,12 @@ class Player(pg.sprite.Sprite):
                     self.rect.x = self.x
         elif dir == 'y':
             if hitted:
+                # print("y dir collison")
                 if self.vel_y > 0:
                     self.y = hitted[0].rect.top - self.rect.height
                 if self.vel_y < 0:
                     self.y = hitted[0].rect.bottom
+
                 self.vel_y = 0
                 self.rect.y = self.y
 

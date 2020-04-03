@@ -5,11 +5,10 @@ assets - sounds and art
 """
 
 # TODO: przebudować system poruszania się:
-# 1. Wystarczy raz nacisnąć strzałkę, żeby nadać kierunek poruszania się.
-# 2. Można nadać kierunek z wyprzedzeniem - jeżeli Pac-Man dojdzie do rozwidlenia, to pójdzie w danym kierunku
-# 3. Pomyśleć, czy nie usunąć self.x i y
-# 4. Żeby skręty dotyczyły tylko ścian na zakrętach, a nie w zwykłym korytarzu
-# - może wystarczy sprawdzić, czy pod daną ścianą w danym kierunku coś jest (ale jak?)
+# 1. Pomyśleć, czy nie usunąć self.x i y
+# 2. Wrócić do frame-based movement (prędkość w pixelach na klatkę, żeby płynniej i bardziej niezawodnie ogarnąć)
+# zakręty.
+
 
 import pygame as pg
 import sys
@@ -82,7 +81,7 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 0, 0))
-        self.draw_grid()
+        # self.draw_grid()
         self.all_sprites.draw(self.screen)
         # pg uses double buffering (likewise whiteboard flipping - draw and then flip the board)
         pg.display.flip()
