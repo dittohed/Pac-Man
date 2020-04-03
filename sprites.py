@@ -33,9 +33,12 @@ class Player(pg.sprite.Sprite):
             self.vel_y = self.speed
 
     def collide_walls(self, dir):
-        hitted = pg.sprite.spritecollide(self, self.game.walls, False) #False, so they don't get deleted
+        hitted = pg.sprite.spritecollide(self, self.game.walls, False) # False, so they don't get deleted
 
+
+        # not sticking to the wall bug fix
         if dir == 'x':
+            """
             if hitted:
                 if self.vel_x > 0:
                     self.x = hitted[0].rect.left - self.rect.width
@@ -43,6 +46,22 @@ class Player(pg.sprite.Sprite):
                     self.x = hitted[0].rect.right
                 self.vel_x = 0
                 self.rect.x = self.x
+            """
+            if hitted:
+                print(self.vel_x)
+                # smooth corners
+                if self.vel_x > 0 and (hitted[0].rect.y - self.rect.y) > (self.rect.height * (2 / 3)):
+                    print(f"You hit a wall ({hitted[0].rect.x / TILE_SIZE}, {hitted[0].rect.y / TILE_SIZE})")
+                    self.y = hitted[0].y - self.rect.height
+                    self.rect.y = self.y
+                #elif self.vel_x > 0:
+                #    self.x = hitted[0].rect.left - self.rect.width
+                #elif self.vel_x < 0:
+                #    self.x = hitted[0].rect.right
+
+                self.vel_x = 0
+                #self.rect.x = self.x
+
         elif dir == 'y':
             if hitted:
                 if self.vel_y > 0:

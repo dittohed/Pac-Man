@@ -4,7 +4,7 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-#TODO: smooth movement (my version)
+#TODO: czemu wywala mi pac-mana, skoro vel = 0
 
 import pygame as pg
 import sys
