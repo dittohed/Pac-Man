@@ -8,17 +8,15 @@ class Player(pg.sprite.Sprite):
         self.game = game
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill((0, 255, 255))
-        self.rect = self.image.get_rect()
 
-        # initially grid coordinates,
-        # currently these are actual player coordinates (because rect coordinates must be integers)
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
+        self.rect = self.image.get_rect() # player coordinate
+        self.rect.x = x * TILE_SIZE
+        self.rect.y = y * TILE_SIZE
 
         # moving
-        self.speed = 150
+        self.speed = 2 # 2 pixels per second
         self.vel_x, self.vel_y = 0, 0
-        self.wanna_go = 'r' # to make movement more comfortable and lacking-1-pixel-to-turn-right problem
+        self.wanna_go = 'r' # to make movement more comfortable - player can pick directions in advance
 
     def get_keys(self):
         keys = pg.key.get_pressed() # object denoting which keys are currently held down
@@ -33,47 +31,24 @@ class Player(pg.sprite.Sprite):
             self.wanna_go = 'd'
 
     def collide_walls(self, dir):
-        hitted = pg.sprite.spritecollide(self, self.game.walls, False) #False, so they don't get deleted
+        hitted = pg.sprite.spritecollide(self, self.game.walls, False) # False, so they don't get deleted
 
         if dir == 'x':
             if hitted:
-                # print("x dir collison")
-                # each case covers different crossroad problem type
-                # this prevents blocking player, because it's 1 pixel higher than a corridor he wants to enter
+                if self.vel_x > 0:
+                    self.rect.x = hitted[0].rect.left - self.rect.width
+                if self.vel_x < 0:
+                    self.rect.x = hitted[0].rect.right
 
-                # and make sure that corridor is above a hitted wall
-                if self.vel_y < 0 and \
-                self.game.screen.get_at((hitted[0].rect.x, hitted[0].rect.y - 1))[:3] == (0, 0, 0) and \
-                (hitted[0].rect.y - self.rect.y > 0.8 * self.rect.height): # 0.8 is small enough & yet works
-                    # going up, wanting to turn left or right
-                    self.vel_y = 0
-                    self.y = hitted[0].rect.y - self.rect.height
-                    self.rect.y = self.y
-                elif self.vel_y > 0 and \
-                self.game.screen.get_at((hitted[0].rect.x, hitted[0].rect.y + 1))[:3] == (0, 0, 0) and \
-                self.rect.y - hitted[0].rect.y > 0.8 * self.rect.height:
-                    # going down, wanting to turn left or right
-                    self.vel_y = 0
-                    self.y = hitted[0].rect.y + self.rect.height
-                    self.rect.y = self.y
-                else:
-                    if self.vel_x > 0:
-                        self.x = hitted[0].rect.left - self.rect.width
-                    if self.vel_x < 0:
-                        self.x = hitted[0].rect.right
-
-                    self.vel_x = 0
-                    self.rect.x = self.x
+                self.vel_x = 0
         elif dir == 'y':
             if hitted:
-                # print("y dir collison")
                 if self.vel_y > 0:
-                    self.y = hitted[0].rect.top - self.rect.height
+                    self.rect.y = hitted[0].rect.top - self.rect.height
                 if self.vel_y < 0:
-                    self.y = hitted[0].rect.bottom
+                    self.rect.y = hitted[0].rect.bottom
 
                 self.vel_y = 0
-                self.rect.y = self.y
 
     def update(self):
         self.get_keys()
@@ -88,15 +63,12 @@ class Player(pg.sprite.Sprite):
         elif self.wanna_go == 'd':
             self.vel_y = self.speed
 
-        # velocities are pixels per second, not per frame!
-        self.x += self.vel_x * self.game.dt
-        self.y += self.vel_y * self.game.dt
-
-        # collisions check
-        self.rect.x = self.x # control player sprite actual x-coordinate
+        # collisions check - change player coordinate and then check for any collisions
+        # this order ensures movement system working properly
+        self.rect.x += self.vel_x
         self.collide_walls('x')
 
-        self.rect.y = self.y
+        self.rect.y += self.vel_y
         self.collide_walls('y')
 
 class Wall(pg.sprite.Sprite):
@@ -105,9 +77,8 @@ class Wall(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((255, 0, 0))
+        self.image.fill((0, 0, 255))
+
         self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE

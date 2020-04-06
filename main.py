@@ -4,12 +4,6 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-# TODO: przebudować system poruszania się:
-# 1. Pomyśleć, czy nie usunąć self.x i y
-# 2. Wrócić do frame-based movement (prędkość w pixelach na klatkę, żeby płynniej i bardziej niezawodnie ogarnąć)
-# zakręty.
-
-
 import pygame as pg
 import sys
 from os import path
@@ -49,17 +43,13 @@ class Game:
         # game loop
         self.playing = True
         while self.playing:
-            self.dt = self.clock.tick(FPS) / 1000
+            self.clock.tick(FPS)
 
         # tick() method computes how many miliseconds have passed since the previous call (previous frame length).
         # Using the argument makes the function delay to keep the game running slower than
         # the given ticks per second. This can be used to help limit the runtime speed of a game.
         # For example, by calling Clock.tick(40) once per frame, the program will never run
         # at more than 40 frames per second.
-
-        # self.dt is useful for time-based movement (frame independent).
-        # Otherwise going to 30 FPS instead of 60 will make sprites slower.
-        # / 1000 to convert miliseconds to seconds.
 
             self.events()
             self.update()
@@ -81,7 +71,7 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 0, 0))
-        # self.draw_grid()
+        self.draw_grid()
         self.all_sprites.draw(self.screen)
         # pg uses double buffering (likewise whiteboard flipping - draw and then flip the board)
         pg.display.flip()
