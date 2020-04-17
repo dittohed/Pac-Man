@@ -1,5 +1,5 @@
 WIDTH = 800 # 25 * 32
-HEIGTH = 800 
+HEIGTH = 800
 FPS = 60
 TITLE = "Pac-Man"
 TILE_SIZE = 32

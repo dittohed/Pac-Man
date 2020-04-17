@@ -71,6 +71,12 @@ class Player(pg.sprite.Sprite):
         self.rect.y += self.vel_y
         self.collide_walls('y')
 
+        # check for left-to-right or right-to-left passage
+        if self.rect.left > 800:
+            self.rect.right = 0
+        elif self.rect.right < 0:
+            self.rect.left = 800
+
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls

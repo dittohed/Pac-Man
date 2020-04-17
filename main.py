@@ -4,6 +4,8 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
+# TODO: identtify graph verticies, build adjacency list (dict + list)
+
 import pygame as pg
 import sys
 from os import path
@@ -18,6 +20,7 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(1, 100) #after 1 ms delay repeat key each 100ms if held
         self.load_data()
+        self.verticies = {}
 
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -38,6 +41,9 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'P':
                     self.player = Player(self, col, row)
+                if tile == '.': # determine graph verticies for path-finding
+                    if col > 2
+
 
     def run(self):
         # game loop
