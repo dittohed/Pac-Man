@@ -4,7 +4,7 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-# TODO: identtify graph verticies, build adjacency list (dict + list)
+# TODO: identify graph verticies, build adjacency list (dict + list), draw them
 
 import pygame as pg
 import sys
@@ -27,6 +27,7 @@ class Game:
 
         f = open(path.join(game_folder, "map.txt"), "r")
         self.map_data = f.readlines()
+        print(self.map_data[1])
 
     def new(self):
         # setup for a new round
@@ -41,9 +42,32 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'P':
                     self.player = Player(self, col, row)
-                if tile == '.': # determine graph verticies for path-finding
-                    if col > 2
 
+                # Let's determine graph verticies for path-finding basing on map file.
+                # What is typical of verticies?
+                # It enables you to go either y or x direction (make them available)!
+
+                if tile in ['.', 'P']:
+                    # assume that it is not a vertice
+                    x_av = [False, False] # left, right not available
+                    y_av = [False, False] # up, down not available
+
+                    if col > 0 and self.map_data[row][col - 1] in ['.', 'P']: # check left
+                        x_av[0] = True
+                        print(f"Left exists for {col, row}")
+                    if col < GRID_WIDTH - 1 and self.map_data[row][col + 1] in ['.', 'P']: # check right
+                        x_av[1] = True
+                        print(f"Right exists for {col, row}")
+                    if row > 0 and self.map_data[row - 1][col] in ['.', 'P']: # check up
+                        y_av[0] = True
+                        print(f"Up exists for {col, row}")
+                    if row < GRID_HEIGHT - 1 and self.map_data[row + 1][col] in ['.', 'P']: # check down
+                        y_av[1] = True
+                        print(f"Down exists for {col, row}")
+
+                    # check if either y or x condition is met
+                    if (True in x_av) and (True in y_av):
+                        self.verticies[(col, row)] = []
 
     def run(self):
         # game loop
@@ -51,7 +75,8 @@ class Game:
         while self.playing:
             self.clock.tick(FPS)
 
-        # tick() method computes how many miliseconds have passed since the previous call (previous frame length).
+        # tick() method computes how many miliseconds have passed since the previous call
+        # (previous frame length).
         # Using the argument makes the function delay to keep the game running slower than
         # the given ticks per second. This can be used to help limit the runtime speed of a game.
         # For example, by calling Clock.tick(40) once per frame, the program will never run
@@ -75,10 +100,16 @@ class Game:
         for y in range(0, HEIGTH, TILE_SIZE):
             pg.draw.line(self.screen, (110, 110, 110), (0, y), (WIDTH, y)) # draw horizontal lines
 
+    def draw_verticies(self):
+        for key in self.verticies.keys():
+            pg.draw.rect(self.screen, (255, 0, 0),
+                pg.Rect(key[0] * TILE_SIZE, key[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+
     def draw(self):
         self.screen.fill((0, 0, 0))
         self.draw_grid()
         self.all_sprites.draw(self.screen)
+        self.draw_verticies()
         # pg uses double buffering (likewise whiteboard flipping - draw and then flip the board)
         pg.display.flip()
 
