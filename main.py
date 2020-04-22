@@ -4,7 +4,7 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-# TODO: identify graph verticies, build adjacency list (dict + list), draw them
+# TODO: build adjacency list (dict + list), draw them
 
 import pygame as pg
 import sys
@@ -20,14 +20,13 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(1, 100) #after 1 ms delay repeat key each 100ms if held
         self.load_data()
-        self.verticies = {}
+        self.vertices = {}
 
     def load_data(self):
         game_folder = path.dirname(__file__)
 
         f = open(path.join(game_folder, "map.txt"), "r")
         self.map_data = f.readlines()
-        print(self.map_data[1])
 
     def new(self):
         # setup for a new round
@@ -43,8 +42,8 @@ class Game:
                 if tile == 'P':
                     self.player = Player(self, col, row)
 
-                # Let's determine graph verticies for path-finding basing on map file.
-                # What is typical of verticies?
+                # Let's determine graph vertices for path-finding basing on map file.
+                # What is typical of vertices?
                 # It enables you to go either y or x direction (make them available)!
 
                 if tile in ['.', 'P']:
@@ -54,20 +53,17 @@ class Game:
 
                     if col > 0 and self.map_data[row][col - 1] in ['.', 'P']: # check left
                         x_av[0] = True
-                        print(f"Left exists for {col, row}")
                     if col < GRID_WIDTH - 1 and self.map_data[row][col + 1] in ['.', 'P']: # check right
                         x_av[1] = True
-                        print(f"Right exists for {col, row}")
                     if row > 0 and self.map_data[row - 1][col] in ['.', 'P']: # check up
                         y_av[0] = True
-                        print(f"Up exists for {col, row}")
                     if row < GRID_HEIGHT - 1 and self.map_data[row + 1][col] in ['.', 'P']: # check down
                         y_av[1] = True
-                        print(f"Down exists for {col, row}")
 
                     # check if either y or x condition is met
                     if (True in x_av) and (True in y_av):
-                        self.verticies[(col, row)] = []
+                        self.vertices[(col, row)] = [x_av, y_av] # initially store neighbours directions
+                                                                  # in order to determine their coordinates later
 
     def run(self):
         # game loop
@@ -100,8 +96,8 @@ class Game:
         for y in range(0, HEIGTH, TILE_SIZE):
             pg.draw.line(self.screen, (110, 110, 110), (0, y), (WIDTH, y)) # draw horizontal lines
 
-    def draw_verticies(self):
-        for key in self.verticies.keys():
+    def draw_vertices(self):
+        for key in self.vertices.keys():
             pg.draw.rect(self.screen, (255, 0, 0),
                 pg.Rect(key[0] * TILE_SIZE, key[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
@@ -109,7 +105,7 @@ class Game:
         self.screen.fill((0, 0, 0))
         self.draw_grid()
         self.all_sprites.draw(self.screen)
-        self.draw_verticies()
+        self.draw_vertices()
         # pg uses double buffering (likewise whiteboard flipping - draw and then flip the board)
         pg.display.flip()
 
