@@ -4,13 +4,15 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-# TODO: build adjacency list (dict + list), draw them
+# TODO: test adjacency lists
+# 10000. Ustalać to wszystko przy ładowaniu danych (nie dla każdej nowej gry - bez sensu)
 
 import pygame as pg
 import sys
 from os import path
 from settings import *
 from sprites import *
+from vertex import *
 
 class Game:
     def __init__(self):
@@ -20,7 +22,7 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(1, 100) #after 1 ms delay repeat key each 100ms if held
         self.load_data()
-        self.vertices = {}
+        self.vertices = set() # set containing Vertex objects (vertices for path-finding)
 
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -47,23 +49,54 @@ class Game:
                 # It enables you to go either y or x direction (make them available)!
 
                 if tile in ['.', 'P']:
-                    # assume that it is not a vertice
-                    x_av = [False, False] # left, right not available
-                    y_av = [False, False] # up, down not available
+                    neigh_directions = set()
 
                     if col > 0 and self.map_data[row][col - 1] in ['.', 'P']: # check left
-                        x_av[0] = True
+                        neigh_directions.add("left")
                     if col < GRID_WIDTH - 1 and self.map_data[row][col + 1] in ['.', 'P']: # check right
-                        x_av[1] = True
+                        neigh_directions.add("right")
                     if row > 0 and self.map_data[row - 1][col] in ['.', 'P']: # check up
-                        y_av[0] = True
+                        neigh_directions.add("up")
                     if row < GRID_HEIGHT - 1 and self.map_data[row + 1][col] in ['.', 'P']: # check down
-                        y_av[1] = True
+                        neigh_directions.add("down")
 
                     # check if either y or x condition is met
-                    if (True in x_av) and (True in y_av):
-                        self.vertices[(col, row)] = [x_av, y_av] # initially store neighbours directions
-                                                                  # in order to determine their coordinates later
+                    if (("left" in neigh_directions or "right" in neigh_directions)
+                            and ("up" in neigh_directions or "down" in neigh_directions)):
+                        self.vertices.add(Vertex((col, row), neigh_directions))
+
+        # build adjacency lists
+        for v1 in self.vertices:
+            INF = 10000 # any actual distance will be lesser than 10000
+            currently_closest = {"left": [tuple(), INF],
+                "right": [tuple(), INF],
+                "up": [tuple(), INF],
+                "down": [tuple(), INF]}
+
+            for v2 in self.vertices:
+                if v1 == v2:
+                    continue
+
+                if "left" in v1.neigh_directions:
+                    if v1.y == v2.y and v1.x > v2.x and currently_closest["left"][1] > v1.x - v2.x:
+                        currently_closest["left"][0] = (v2.x, v2.y)
+                        currently_closest["left"][1] = v1.x - v2.x
+                if "right" in v1.neigh_directions:
+                    if v1.y == v2.y and v1.x < v2.x and currently_closest["right"][1] > v2.x - v1.x:
+                        currently_closest["right"][0] = (v2.x, v2.y)
+                        currently_closest["right"][1] = v2.x - v1.x
+                if "up" in v1.neigh_directions:
+                    if v1.x == v2.x and v1.y > v2.y and currently_closest["up"][1] > v1.y - v2.y:
+                        currently_closest["up"][0] = (v2.x, v2.y)
+                        currently_closest["up"][1] = v1.y - v2.y
+                if "down" in v1.neigh_directions:
+                    if v1.x == v2.x and v1.y < v2.y and currently_closest["down"][1] > v2.y - v1.y:
+                        currently_closest["down"][0] = (v2.x, v2.y)
+                        currently_closest["down"][1] = v2.y - v1.y
+
+            for key in currently_closest.keys():
+                if key in v1.neigh_directions:
+                    v1.adj.append(tuple(currently_closest[key]))
 
     def run(self):
         # game loop
@@ -97,9 +130,9 @@ class Game:
             pg.draw.line(self.screen, (110, 110, 110), (0, y), (WIDTH, y)) # draw horizontal lines
 
     def draw_vertices(self):
-        for key in self.vertices.keys():
+        for v in self.vertices:
             pg.draw.rect(self.screen, (255, 0, 0),
-                pg.Rect(key[0] * TILE_SIZE, key[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+                pg.Rect(v.x * TILE_SIZE, v.y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -131,5 +164,8 @@ g.show_start_screen()
 
 while True:
     g.new()
+    # test - wypisz wierzchołki i ich sąsiadów
+    for v in g.vertices:
+        print(f"Vertex at ({v.x}, {v.y}), adjacency list: {v.adj}")
     g.run()
     g.show_game_over_screen()
