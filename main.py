@@ -4,8 +4,9 @@ sprites - 2D bitmap used to represent objects
 assets - sounds and art
 """
 
-# TODO: test adjacency lists
-# 10000. Ustalać to wszystko przy ładowaniu danych (nie dla każdej nowej gry - bez sensu)
+# TODO:
+# 1. Move vertices part to the seperate file (calculate this in Game.load_data())
+# 2. Create determine_neighbors_dir(), determine_neighbors() functions
 
 import pygame as pg
 import sys
@@ -20,7 +21,7 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGTH))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
-        pg.key.set_repeat(1, 100) #after 1 ms delay repeat key each 100ms if held
+        pg.key.set_repeat(1, 100) # after 1 ms delay repeat key each 100ms if held
         self.load_data()
         self.vertices = set() # set containing Vertex objects (vertices for path-finding)
 
@@ -68,10 +69,10 @@ class Game:
         # build adjacency lists
         for v1 in self.vertices:
             INF = 10000 # any actual distance will be lesser than 10000
-            currently_closest = {"left": [tuple(), INF],
-                "right": [tuple(), INF],
-                "up": [tuple(), INF],
-                "down": [tuple(), INF]}
+            currently_closest = {"left": [None, INF], # instead of [tuple(), INF]
+                "right": [None INF],
+                "up": [None, INF],
+                "down": [None, INF]}
 
             for v2 in self.vertices:
                 if v1 == v2:
@@ -79,23 +80,23 @@ class Game:
 
                 if "left" in v1.neigh_directions:
                     if v1.y == v2.y and v1.x > v2.x and currently_closest["left"][1] > v1.x - v2.x:
-                        currently_closest["left"][0] = (v2.x, v2.y)
+                        currently_closest["left"][0] = v2 # instead of (v2.x, v2.y)
                         currently_closest["left"][1] = v1.x - v2.x
                 if "right" in v1.neigh_directions:
                     if v1.y == v2.y and v1.x < v2.x and currently_closest["right"][1] > v2.x - v1.x:
-                        currently_closest["right"][0] = (v2.x, v2.y)
+                        currently_closest["right"][0] = v2 # instead of (v2.x, v2.y)
                         currently_closest["right"][1] = v2.x - v1.x
                 if "up" in v1.neigh_directions:
                     if v1.x == v2.x and v1.y > v2.y and currently_closest["up"][1] > v1.y - v2.y:
-                        currently_closest["up"][0] = (v2.x, v2.y)
+                        currently_closest["up"][0] = v2 # instead of (v2.x, v2.y)
                         currently_closest["up"][1] = v1.y - v2.y
                 if "down" in v1.neigh_directions:
                     if v1.x == v2.x and v1.y < v2.y and currently_closest["down"][1] > v2.y - v1.y:
-                        currently_closest["down"][0] = (v2.x, v2.y)
+                        currently_closest["down"][0] = v2 # instead of (v2.x, v2.y)
                         currently_closest["down"][1] = v2.y - v1.y
 
             for key in currently_closest.keys():
-                if key in v1.neigh_directions:
+                if currently_closest[key][0]: # instead of if key in v1.neigh_directions:
                     v1.adj.append(tuple(currently_closest[key]))
 
     def run(self):
