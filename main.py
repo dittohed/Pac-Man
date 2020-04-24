@@ -6,7 +6,7 @@ assets - sounds and art
 
 # TODO:
 # 1. Move vertices part to the seperate file (calculate this in Game.load_data())
-# 2. Create determine_neighbors_dir(), determine_neighbors() functions
+# 2. Why does start_v has an empty adj list?
 
 import pygame as pg
 import sys
@@ -14,6 +14,7 @@ from os import path
 from settings import *
 from sprites import *
 from vertex import *
+from a_star import *
 
 class Game:
     def __init__(self):
@@ -50,54 +51,12 @@ class Game:
                 # It enables you to go either y or x direction (make them available)!
 
                 if tile in ['.', 'P']:
-                    neigh_directions = set()
+                    determine_neighbors_dir(col, row, self.map_data, self.vertices)
+                    # This function determines all possible neighbors directions and creates a vertex if it enables
+                    # you to go either y or x direction.
 
-                    if col > 0 and self.map_data[row][col - 1] in ['.', 'P']: # check left
-                        neigh_directions.add("left")
-                    if col < GRID_WIDTH - 1 and self.map_data[row][col + 1] in ['.', 'P']: # check right
-                        neigh_directions.add("right")
-                    if row > 0 and self.map_data[row - 1][col] in ['.', 'P']: # check up
-                        neigh_directions.add("up")
-                    if row < GRID_HEIGHT - 1 and self.map_data[row + 1][col] in ['.', 'P']: # check down
-                        neigh_directions.add("down")
-
-                    # check if either y or x condition is met
-                    if (("left" in neigh_directions or "right" in neigh_directions)
-                            and ("up" in neigh_directions or "down" in neigh_directions)):
-                        self.vertices.add(Vertex((col, row), neigh_directions))
-
-        # build adjacency lists
-        for v1 in self.vertices:
-            INF = 10000 # any actual distance will be lesser than 10000
-            currently_closest = {"left": [None, INF], # instead of [tuple(), INF]
-                "right": [None INF],
-                "up": [None, INF],
-                "down": [None, INF]}
-
-            for v2 in self.vertices:
-                if v1 == v2:
-                    continue
-
-                if "left" in v1.neigh_directions:
-                    if v1.y == v2.y and v1.x > v2.x and currently_closest["left"][1] > v1.x - v2.x:
-                        currently_closest["left"][0] = v2 # instead of (v2.x, v2.y)
-                        currently_closest["left"][1] = v1.x - v2.x
-                if "right" in v1.neigh_directions:
-                    if v1.y == v2.y and v1.x < v2.x and currently_closest["right"][1] > v2.x - v1.x:
-                        currently_closest["right"][0] = v2 # instead of (v2.x, v2.y)
-                        currently_closest["right"][1] = v2.x - v1.x
-                if "up" in v1.neigh_directions:
-                    if v1.x == v2.x and v1.y > v2.y and currently_closest["up"][1] > v1.y - v2.y:
-                        currently_closest["up"][0] = v2 # instead of (v2.x, v2.y)
-                        currently_closest["up"][1] = v1.y - v2.y
-                if "down" in v1.neigh_directions:
-                    if v1.x == v2.x and v1.y < v2.y and currently_closest["down"][1] > v2.y - v1.y:
-                        currently_closest["down"][0] = v2 # instead of (v2.x, v2.y)
-                        currently_closest["down"][1] = v2.y - v1.y
-
-            for key in currently_closest.keys():
-                if currently_closest[key][0]: # instead of if key in v1.neigh_directions:
-                    v1.adj.append(tuple(currently_closest[key]))
+        for v in self.vertices:
+            v.build_adj_list(self.vertices) # build adjacency lists
 
     def run(self):
         # game loop
@@ -132,7 +91,7 @@ class Game:
 
     def draw_vertices(self):
         for v in self.vertices:
-            pg.draw.rect(self.screen, (255, 0, 0),
+            pg.draw.rect(self.screen, (160, 160, 160),
                 pg.Rect(v.x * TILE_SIZE, v.y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
     def draw(self):
@@ -166,7 +125,11 @@ g.show_start_screen()
 while True:
     g.new()
     # test - wypisz wierzchołki i ich sąsiadów
+
     for v in g.vertices:
         print(f"Vertex at ({v.x}, {v.y}), adjacency list: {v.adj}")
+
+    # test - wyświetl najkrótszą ścieżkę do gracza z punktu (3, 1)
+    # find_shortest(32 * 3, 32, g.player.rect.x, g.player.rect.y, g)
     g.run()
     g.show_game_over_screen()
