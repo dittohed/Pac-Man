@@ -9,6 +9,7 @@ class Vertex:
                 # set of where neighbors appear (to the "left" or "right" or ...)
 
         self.adj = [] # adjacency list storing neighbors tuples (Vertex, distance_to_this_Vertex)
+        self.in_queue = False
 
         # calculated dynamically
         self.euclidean_distance = None # distance to the player

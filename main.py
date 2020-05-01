@@ -50,7 +50,7 @@ class Game:
                 # What is typical of vertices?
                 # It enables you to go either y or x direction (make them available)!
 
-                if tile in ['.', 'P']:
+                if tile == '.':
                     determine_neighbors_dir(col, row, self.map_data, self.vertices)
                     # This function determines all possible neighbors directions and creates a vertex if it enables
                     # you to go either y or x direction.
@@ -130,6 +130,6 @@ while True:
         print(f"Vertex at ({v.x}, {v.y}), adjacency list: {v.adj}")
 
     # test - wyświetl najkrótszą ścieżkę do gracza z punktu (3, 1)
-    # find_shortest(32 * 3, 32, g.player.rect.x, g.player.rect.y, g)
+    find_shortest(32 * 3, 32, g.player.rect.x, g.player.rect.y, g)
     g.run()
     g.show_game_over_screen()

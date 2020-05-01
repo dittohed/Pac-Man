@@ -8,12 +8,18 @@ def find_shortest(start_x, start_y, player_x, player_y, game):
     # determine neighbors for starting position and create temporary start vertex
     start_v = determine_neighbors_dir(start_x // TILE_SIZE, start_y // TILE_SIZE,
                                         game.map_data, game.vertices, dynamic = True)
+    start_v.build_adj_list(game.vertices)
     start_v.current_shortest[0] = 0
-    print(start_v.neigh_directions)
 
     # determine neighbors for current end (player) position and create temporary end vertex
     end_v = determine_neighbors_dir(player_x // TILE_SIZE, player_y // TILE_SIZE,
                                         game.map_data, game.vertices, dynamic = True)
+    end_v.build_adj_list(game.vertices)
+    for v in end_v.adj: # let vertices surrounding new vertex know about it
+        if v[0].x == end_v.x:
+            v[0].adj.append((end_v, abs(v[0].x - end_v.x)))
+        else:
+            v[0].adj.append((end_v, abs(v[0].y - end_v.y)))
     end_v.current_shortest[0] = 0
 
     # calculate euclidean distance to the player (end_v) for each vertex
@@ -21,17 +27,22 @@ def find_shortest(start_x, start_y, player_x, player_y, game):
         v.euclidean_distance = sqrt((v.x - end_v.x) ** 2 + (v.y - end_v.y) ** 2)
 
     q = [[start_v.current_shortest[0] + start_v.euclidean_distance, start_v]]
+    start_v.in_queue = True
     # Priority queue implemented using a list (sorting each insert / update) ~ O(nlogn).
     # Each queue object is a 2 element list [distace_to_the_vertex, vertex],
     # this allows to sort lists inside a queue.
 
-    # Check this A* implementation
     already_popped = set()
     popped = None
 
-    while popped != end_v:
+    while True:
         popped = q.pop(0)[1]
-        print(f"{popped.x}{popped.y} vertex popped!")
+        print(f"({popped.x}, {popped.y}) popped!")
+        if popped.x == end_v.x and popped.y == end_v.y:
+            break
+            print(f"Player position ({popped.x}, {popped.y}) popped!")
+            print(popped)
+            print(end_v)
 
         # visit all the neighbors
         for neighbor in popped.adj:
@@ -41,20 +52,24 @@ def find_shortest(start_x, start_y, player_x, player_y, game):
             if v in already_popped:
                 continue
 
-            if popped.current_shortest + distance < v.current_shortest:
-                v.current_shortest[0] = popped.current_shortest + distance
+            print(f"Checking ({v.x}, {v.y})!")
+            if popped.current_shortest[0] + distance < v.current_shortest[0]:
+                v.current_shortest[0] = popped.current_shortest[0] + distance
                 v.predecessor = popped
 
-            if v not in q and v not in already_popped:
+            if not v.in_queue and v not in already_popped:
                 q.append([v.current_shortest[0] + v.euclidean_distance, v])
+                v.in_queue = True
+                print(f"Adding ({v.x}, {v.y})!")
 
             q.sort() # sorting forces a priority queue functionality
 
         already_popped.add(popped)
 
-    # print shortest path
+    # print the shortest path
+    print(end_v.predecessor)
     v = end_v
-    while predecessor != None:
+    while v.predecessor != None:
         pg.draw.rect(self.screen, (255, 0, 0),
             pg.Rect(v.x * TILE_SIZE, v.y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
         print(f"My coordinates: ({v.x}, {v.y})")
